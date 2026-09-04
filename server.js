@@ -22,6 +22,23 @@ function safeFilename(value, fallback = 'yani-smart-document') {
   return cleaned || fallback;
 }
 
+function cleanGeneratedDocument(text) {
+  return String(text || '')
+    .replace(/\r\n/g, '\n')
+    // Remove Markdown heading markers such as #, ##, ### at the start of lines.
+    .replace(/^\s{0,3}#{1,6}\s*/gm, '')
+    // Remove Markdown bold/italic markers while keeping the words themselves.
+    .replace(/\*\*([^*\n]+)\*\*/g, '$1')
+    .replace(/__([^_\n]+)__/g, '$1')
+    .replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g, '$1')
+    .replace(/(?<!_)_([^_\n]+)_(?!_)/g, '$1')
+    // Convert Markdown asterisk bullets to a clean bullet character.
+    .replace(/^\s*\*\s+/gm, '• ')
+    // Remove inline code fences/backticks used only as formatting.
+    .replace(/`{1,3}/g, '')
+    .trim();
+}
+
 function splitDocument(text) {
   const blocks = String(text || '')
     .replace(/\r\n/g, '\n')
@@ -72,14 +89,14 @@ ${details}
 
 Document structure guidance: ${structureRules[documentType]}
 
-Rules: Preserve facts supplied by the user. Do not invent names, dates, amounts, commitments, legal claims, or business facts. Never insert today's date unless the user explicitly supplied it. When a critical fact is missing, use a neutral placeholder in square brackets. Return only the finished document body, with a useful title as the first line. Use clear paragraphs and light headings only when appropriate for the document type.`;
+Rules: Preserve facts supplied by the user. Do not invent names, dates, amounts, commitments, legal claims, or business facts. Never insert today's date unless the user explicitly supplied it. When a critical fact is missing, use a neutral placeholder in square brackets. Return only the finished document body, with a useful title as the first line. Use clear paragraphs and light headings only when appropriate for the document type. OUTPUT PLAIN TEXT ONLY. Do not use Markdown formatting or Markdown symbols for headings or emphasis. Do not use #, ##, **, *, underscores, or backticks as formatting. Use plain-text headings and labels instead. Square brackets for placeholders such as [Date] and [Client Name] are required and should be retained.`;
 
     const response = await client.responses.create({
       model: process.env.OPENAI_MODEL || 'gpt-5.6-luna',
       input: prompt
     });
 
-    const text = response.output_text?.trim();
+    const text = cleanGeneratedDocument(response.output_text);
     if (!text) throw new Error('Empty AI response');
     res.json({ document: text });
   } catch (err) {
