@@ -1,15 +1,21 @@
 # Yani Builds — Smart Document Generator
 
-Portfolio Demo #02. Turns rough notes into polished business documents using the OpenAI Responses API.
+Portfolio demo that turns rough notes into polished business documents using OpenAI.
 
-## Local setup
-1. `npm install`
-2. Copy `.env.example` to `.env`
-3. Add `OPENAI_API_KEY`
-4. `npm start`
-5. Open `http://localhost:10000`
+## Features
 
-## Deploy
-Works as a Node web service. Add `OPENAI_API_KEY` as a server-side environment variable. Never place the API key in `/public`.
+- Business Letter, Proposal, Meeting Summary, Memo, and Custom Document
+- Professional, Friendly, Concise, Persuasive, and Formal tones
+- Editable AI-generated document preview
+- Copy to clipboard
+- Download as Microsoft Word (.docx)
+- Download as PDF (.pdf)
 
-Supported documents: Business Letter, Proposal, Meeting Summary, Memo, Custom Document.
+## Run locally
+
+1. Copy `.env.example` to `.env` and add your OpenAI API key.
+2. Run `npm install`.
+3. Run `npm start`.
+4. Open `http://localhost:10000`.
+
+Keep API keys server-side and never commit `.env`.
