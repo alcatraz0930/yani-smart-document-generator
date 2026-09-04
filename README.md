@@ -19,3 +19,7 @@ Portfolio demo that turns rough notes into polished business documents using Ope
 4. Open `http://localhost:10000`.
 
 Keep API keys server-side and never commit `.env`.
+
+
+## v1.2
+Added document-specific adaptive fields. Business letters, proposals, meeting summaries, memos, and custom documents now collect context that matches the selected document type, including date placeholders and role-specific fields.

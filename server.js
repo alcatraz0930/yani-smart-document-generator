@@ -38,8 +38,9 @@ app.post('/api/generate', async (req, res) => {
     const documentType = clean(req.body?.documentType, 80);
     const tone = clean(req.body?.tone, 50);
     const details = clean(req.body?.details, 6000);
-    const recipient = clean(req.body?.recipient, 160);
     const title = clean(req.body?.title, 200);
+    const rawFields = req.body?.fields && typeof req.body.fields === 'object' ? req.body.fields : {};
+    const fields = Object.fromEntries(Object.entries(rawFields).slice(0, 12).map(([key, value]) => [clean(key, 60), clean(value, 220)]));
 
     if (!types.includes(documentType) || !tones.includes(tone) || details.length < 15) {
       return res.status(400).json({ error: 'Please provide a document type, tone, and enough details to generate the document.' });
@@ -50,7 +51,28 @@ app.post('/api/generate', async (req, res) => {
     }
 
     const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    const prompt = `Create a polished ${documentType} in ${tone} American English.\nTitle/topic: ${title || 'Infer an appropriate title'}\nRecipient/audience: ${recipient || 'Not specified'}\nUser notes:\n${details}\n\nRules: Preserve facts supplied by the user. Do not invent names, dates, amounts, commitments, legal claims, or business facts. If a critical fact is missing, use a neutral placeholder in square brackets. Return only the finished document body, with a useful title as the first line. Use clear paragraphs and light headings only when appropriate for the document type.`;
+    const fieldLines = Object.entries(fields)
+      .map(([key, value]) => `${key}: ${value || '[Not provided]'}`)
+      .join('\n');
+
+    const structureRules = {
+      'Business Letter': 'Use a conventional business-letter structure. If no document date is provided, include [Date]. If recipient name, sender name, or other critical identity details are missing, use clear square-bracket placeholders such as [Client Name] or [Your Name].',
+      'Proposal': 'Use a concise professional proposal structure with an appropriate title and sections such as overview, proposed approach, deliverables or next steps only when supported by the notes. If the proposal date or key party details are missing, use square-bracket placeholders.',
+      'Meeting Summary': 'Use a meeting-summary structure with Date, Attendees, Topic/Purpose, Key Discussion Points, Decisions, and Action Items only when supported. If the meeting date or attendees are missing, use [Date] or [Attendees] placeholders rather than inventing them.',
+      'Memo': 'Use a memo structure with Date, To, From, and Subject headers. Use [Date], [Recipient], [Your Name], or [Subject] when required information is missing.',
+      'Custom Document': 'Choose a structure appropriate to the user notes. Only include a date if it is useful or explicitly relevant; if a needed date or identity detail is missing, use a square-bracket placeholder.'
+    };
+
+    const prompt = `Create a polished ${documentType} in ${tone} American English.
+Title/topic: ${title || 'Infer an appropriate title'}
+Document-specific fields:
+${fieldLines || 'None provided'}
+User notes:
+${details}
+
+Document structure guidance: ${structureRules[documentType]}
+
+Rules: Preserve facts supplied by the user. Do not invent names, dates, amounts, commitments, legal claims, or business facts. Never insert today's date unless the user explicitly supplied it. When a critical fact is missing, use a neutral placeholder in square brackets. Return only the finished document body, with a useful title as the first line. Use clear paragraphs and light headings only when appropriate for the document type.`;
 
     const response = await client.responses.create({
       model: process.env.OPENAI_MODEL || 'gpt-5.6-luna',
