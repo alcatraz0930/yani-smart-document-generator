@@ -27,3 +27,7 @@ Added document-specific adaptive fields. Business letters, proposals, meeting su
 
 ## v1.3
 Generated documents are normalized to clean plain text. Markdown heading/emphasis markers such as `#` and `*` are removed while square-bracket placeholders such as `[Date]` are preserved.
+
+
+## v1.4
+Improved document-type writing conventions. Meeting summaries now use factual, neutral discussion points without courtesy language; memos use direct internal-business wording without greetings, thank-you phrasing, or sign-offs unless explicitly requested; proposals are kept proposal-like rather than follow-up-letter style.
