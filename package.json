@@ -1,0 +1,1 @@
+{"name":"yani-smart-document-generator","version":"1.0.0","type":"module","scripts":{"start":"node server.js"},"engines":{"node":">=20"},"dependencies":{"dotenv":"^16.4.7","express":"^5.1.0","openai":"^5.12.2","zod":"^3.25.76"}}
